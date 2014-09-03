@@ -1,0 +1,36 @@
+<modification>
+	<id>PayPal - Frete Fácil</id>
+	<version>1.0</version>
+	<vqmver>2.x</vqmver>
+	<author>
+		<![CDATA[<a href="mailto:extensoes@marcomolina.com.br">Marco Molina</a>]]>
+	</author>
+	<file name="catalog/model/payment/pp_express.php">
+		<operation info="Envia informações de endereço para Frete Fácil - Campos Padrão" error="skip">
+			<search position="before">
+				<![CDATA[
+				return $data;
+				]]>
+			</search>
+			<add>
+				<![CDATA[
+				$sql  = 'SELECT a.telephone, a.payment_firstname, a.payment_lastname, a.payment_tax_id, a.shipping_firstname, a.shipping_lastname, a.shipping_company, a.shipping_address_1, a.shipping_address_2, a.shipping_city, a.shipping_postcode, a.shipping_country, a.shipping_country_id, a.shipping_zone, a.shipping_zone_id, a.shipping_address_format, a.shipping_method, a.shipping_code, b.iso_code_2 FROM ' . DB_PREFIX . 'order as a, ' . DB_PREFIX . 'country as b WHERE (a.shipping_country_id =  b.country_id) and order_id = ' . $_SESSION['order_id'];
+				$campos = $this->db->query($sql);
+				$data['ADDROVERRIDE'] = '1';
+				$data['FIRSTNAME'] = $campos->row['payment_firstname'];
+				$data['LASTNAME'] = $campos->row['payment_lastname'];
+				$data['PAYMENTREQUEST_0_SHIPTOPHONENUM'] = preg_replace('/\D/', '', $campos->row['telephone']);
+				$data['PAYMENTREQUEST_0_SHIPTONAME'] = $campos->row['shipping_firstname'] . ' ' . $campos->row['shipping_lastname'];
+				$data['PAYMENTREQUEST_0_SHIPTOSTREET'] = $campos->row['shipping_address_1'] . ' ' . $campos->row['shipping_company'];
+				$data['PAYMENTREQUEST_0_SHIPTOSTREET2'] = $campos->row['shipping_address_2'];
+				$data['PAYMENTREQUEST_0_SHIPTOCITY'] = $campos->row['shipping_city'];
+				$data['PAYMENTREQUEST_0_SHIPTOSTATE'] = $campos->row['shipping_zone'];
+				$data['PAYMENTREQUEST_0_SHIPTOZIP'] = $campos->row['shipping_postcode'];
+				$data['PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'] = $campos->row['iso_code_2'];
+				$data['TAXID'] = preg_replace('/\D/', '', $campos->row['payment_tax_id']);
+				$data['TAXIDTYPE'] = 'BR_CPF';
+				]]>
+			</add>
+		</operation>
+	</file>
+</modification>
